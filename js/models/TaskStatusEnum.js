@@ -1,4 +1,6 @@
-var AppScope = "AppScope" in window ? window.AppScope : {};
+if (!!!AppScope) {
+    var AppScope = {}
+}
 
 AppScope.TaskStatusEnum = (function () {
     var TaskStatus = function (code, label) {
@@ -6,8 +8,8 @@ AppScope.TaskStatusEnum = (function () {
         this.label = label;
     };
 
-    var ACTIVE_TASK = new TaskStatus("ACTIVE_TASK", "Active");
-    var COMPLETED_TASK = new TaskStatus("COMPLETED_TASK", "Completed");
+    var ACTIVE_TASK = new TaskStatus('ACTIVE_TASK', 'Active');
+    var COMPLETED_TASK = new TaskStatus('COMPLETED_TASK', 'Completed');
 
     function getByCode(code) {
         if (code in this) {

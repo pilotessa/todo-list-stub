@@ -1,4 +1,6 @@
-var AppScope = "AppScope" in window ? window.AppScope : {};
+if (!!!AppScope) {
+    var AppScope = {}
+}
 
 AppScope.config = {
     storage: "localStorage"
@@ -8,4 +10,4 @@ AppScope.config = {
 AppScope.TaskService.initialize();
 
 // Initialize Page controller
-AppScope.TodoListController.initialize();
+AppScope.TodoListController.initialize('list');

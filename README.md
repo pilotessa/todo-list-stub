@@ -1,4 +1,4 @@
-Basic JS Practise lesson | PHP Academy
-----------------------------------------------
+ToDo List
+=========
 
-A small initial structure for todo list task.    
+[Демо](https://pilotessa.github.io/todo-list-stub/)

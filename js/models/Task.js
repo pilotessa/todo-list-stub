@@ -1,4 +1,6 @@
-var AppScope = "AppScope" in window ? window.AppScope : {};
+if (!!!AppScope) {
+    var AppScope = {}
+}
 
 AppScope.Task = function () {
     this.id;
@@ -12,7 +14,7 @@ AppScope.Task.prototype = {
     fromJSON: function (json) {
         this.id = json.id;
         this.value = json.value;
-        this.status = TaskStatusEnum.getByCode(json.status);
+        this.status = AppScope.TaskStatusEnum.getByCode(json.status);
         this.isChecked = Boolean(json.isChecked);
 
         return this;

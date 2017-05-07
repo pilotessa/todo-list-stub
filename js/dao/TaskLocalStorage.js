@@ -6,22 +6,25 @@ AppScope.TaskLocalStorage = (function () {
 
     var TASKS_KEY = AppScope.localStorageConstants.TASK_LIST;
     var Task = AppScope.Task;
+    var data; // List data cache
 
     function getAll(onSuccess) {
         try {
-            var taskListStringified = localStorage.getItem(TASKS_KEY),
-                taskList = taskListStringified ? JSON.parse(taskListStringified.trim()) : [];
+            if (!data) {
+                var taskListStringified = localStorage.getItem(TASKS_KEY),
+                    taskList = taskListStringified ? JSON.parse(taskListStringified.trim()) : [];
 
-            taskList = Array.isArray(taskList) ? taskList : [taskList];
+                taskList = Array.isArray(taskList) ? taskList : [taskList];
+                data = [];
+                for (var i = 0; i < taskList.length; i++) {
+                    var taskJson = taskList[i];
 
-            for (var i = 0; i < taskList.length; i++) {
-                var taskJson = taskList[i];
-
-                taskList[i] = new Task().fromJSON(taskJson);
+                    data.push(new Task().fromJSON(taskJson));
+                }
             }
 
             if (onSuccess) {
-                onSuccess(taskList);
+                onSuccess(data);
             }
         } catch (e) {
             console.log(e.message);
@@ -32,8 +35,9 @@ AppScope.TaskLocalStorage = (function () {
         var taskListJson = [],
             taskListStringified;
 
-        for (var i = 0; i < taskList.length; i++) {
-            taskListJson.push(taskList[i].toJSON());
+        data = taskList;
+        for (var i = 0; i < data.length; i++) {
+            taskListJson.push(data[i].toJSON());
         }
 
         taskListStringified = JSON.stringify(taskListJson);

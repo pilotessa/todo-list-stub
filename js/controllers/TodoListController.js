@@ -4,82 +4,38 @@ if (!!!AppScope) {
 
 AppScope.TodoListController = (function () {
 
-    var isInitialized,
-        taskListWrapperId,
-        $taskListWrapper,
-        $taskList,
-        $taskListNewValue,
-        $taskListFooter,
-        $taskListMassUpdate,
-        $taskListFilter,
-        createTaskListener,
-        updateTaskListener,
-        massUpdateListener,
-        filterListener;
+    var TaskService = AppScope.TaskService,
+        isInitialized,
+        listWrapperId,
+        $listWrapper,
+        $list,
+        $listNewValue,
+        $listFooter,
+        $listBatchUpdate,
+        $listFilter;
 
     function initialize(wrapperId) {
-        if (!isInitialized) {
-            if (!wrapperId) {
-                throw new Error("List ID is undefined");
-            }
+        if (!wrapperId) {
+            throw new Error("List ID is undefined");
+        }
 
+        listWrapperId = wrapperId;
+
+        // Initialize Service / Caches
+        document.addEventListener('taskServiceInitialize', onServiceInitialize, false);
+        AppScope.TaskService.initialize(onServiceInitialize);
+    }
+
+    function  onServiceInitialize() {
+        if (!isInitialized) {
             isInitialized = true;
-            taskListWrapperId = wrapperId;
 
             renderStaticContent();
             initStaticContentListeners();
-
-            loadTaskList();
-            filterTaskList();
-        } else {
-            loadTaskList();
-            filterTaskList();
-        }
-    }
-
-    function getElementNode(el) {
-        return el.id ? document.getElementById(el.id) : null;
-    }
-
-    function renderElement(el) {
-        var $li,
-            liClassName,
-            actionClassName;
-
-        if (el.id) {
-            $li = getElementNode(el);
         }
 
-        if (!$li) {
-            $li = document.createElement('li');
-            $li.id = el.id;
-        }
-
-        if (el.status === AppScope.TaskStatusEnum.ACTIVE_TASK) {
-            liClassName = 'list-group-item-warning';
-            actionClassName = 'glyphicon glyphicon-ok todo-list-item-mark-as-complete';
-        } else if (el.status === AppScope.TaskStatusEnum.COMPLETED_TASK) {
-            liClassName = 'list-group-item-success';
-            actionClassName = 'glyphicon glyphicon-repeat todo-list-item-mark-as-active';
-        }
-
-        $li.className = 'todo-list-item list-group-item ' + liClassName;
-        $li.innerHTML = '<div>' +
-            '<span class="todo-list-title"><input type="checkbox" class="todo-list-item-check"' + (el.isChecked ? 'checked' : '') + '>' + el.value + '</span>' +
-            '<span class="todo-list-item-delete glyphicon glyphicon-remove"></span>' +
-            '<span class="glyphicon ' + actionClassName + '"></span>' +
-            '</div>';
-
-        return $li;
-    }
-
-    function renderList(taskList) {
-        for (var i = 0; i < taskList.length; i++) {
-            var el = taskList[i],
-                $li = renderElement(el);
-
-            $taskList.insertBefore($li, $taskListFooter);
-        }
+        loadList();
+        filterList();
     }
 
     function renderStaticContent() {
@@ -89,7 +45,7 @@ AppScope.TodoListController = (function () {
                 '</li>' +
                 '<li class="todo-list-footer list-group-item active form-inline">' +
                     'With selected: ' +
-                    '<select class="todo-list-mass-update form-control input-sm">' +
+                    '<select class="todo-list-batch-update form-control input-sm">' +
                         '<option value="">Choose action</option>' +
                         '<option value="delete">Delete</option>' +
                         '<option value="complete">Mark as complete</option>' +
@@ -103,193 +59,198 @@ AppScope.TodoListController = (function () {
                 '</li>' +
             '</ul>';
 
-        $taskListWrapper = document.getElementById(taskListWrapperId);
-        $taskListWrapper.innerHTML = content;
+        $listWrapper = document.getElementById(listWrapperId);
+        $listWrapper.innerHTML = content;
 
-        $taskList = $taskListWrapper.getElementsByTagName('ul')[0];
-        $taskListNewValue = $taskList.getElementsByClassName('todo-list-new-item-value')[0];
-        $taskListFooter = $taskList.getElementsByClassName('todo-list-footer')[0];
-        $taskListMassUpdate = $taskList.getElementsByClassName('todo-list-mass-update')[0];
-        $taskListFilter = $taskList.getElementsByClassName('todo-list-filter')[0];
+        $list = $listWrapper.getElementsByTagName('ul')[0];
+        $listNewValue = $list.getElementsByClassName('todo-list-new-item-value')[0];
+        $listFooter = $list.getElementsByClassName('todo-list-footer')[0];
+        $listBatchUpdate = $list.getElementsByClassName('todo-list-batch-update')[0];
+        $listFilter = $list.getElementsByClassName('todo-list-filter')[0];
     }
 
     function initStaticContentListeners() {
-        createTaskListener = function (event) {
-            if (event.keyCode == 13) {
-                AppScope.TaskService.createElement(
-                    this.value,
-                    function (el) {
-                        var $li = renderElement(el);
-
-                        $taskList.insertBefore($li, $taskListFooter);
-                        $taskListNewValue.value = '';
-                    }
-                );
-            }
-        };
-        $taskListNewValue.addEventListener('keyup', createTaskListener, false);
-
-        updateTaskListener = function (event) {
-            var $li,
-                el;
-
-            if (event.target.className.indexOf('todo-list-item-check') + 1) {
-                $li = event.target.parentNode.parentNode.parentNode;
-                AppScope.TaskService.getElement(
-                    $li.id,
-                    function (el) {
-                        AppScope.TaskService.toggleIsChecked(el);
-                    }
-                );
-            } else if (event.target.className.indexOf('todo-list-item-mark-as-complete') + 1) {
-                $li = event.target.parentNode.parentNode;
-                AppScope.TaskService.getElement(
-                    $li.id,
-                    function (el) {
-                        AppScope.TaskService.markAs(
-                            el,
-                            AppScope.TaskStatusEnum.COMPLETED_TASK,
-                            function (el) {
-                                renderElement(el);
-                            }
-                        );
-                    }
-                );
-            } else if (event.target.className.indexOf('todo-list-item-delete') + 1) {
-                $li = event.target.parentNode.parentNode;
-                AppScope.TaskService.getElement(
-                    $li.id,
-                    function (el) {
-                        AppScope.TaskService.deleteElement(
-                            el,
-                            function (el) {
-                                $taskList.removeChild($li);
-                            }
-                        );
-                    }
-                );
-            } else if (event.target.className.indexOf('todo-list-item-mark-as-active') + 1) {
-                $li = event.target.parentNode.parentNode;
-                AppScope.TaskService.getElement(
-                    $li.id,
-                    function (el) {
-                        AppScope.TaskService.markAs(
-                            el,
-                            AppScope.TaskStatusEnum.ACTIVE_TASK,
-                            function (el) {
-                                renderElement(el);
-                            }
-                        );
-                    }
-                );
-            }
-        };
-        $taskList.addEventListener('click', updateTaskListener, false);
-
-        massUpdateListener = function (event) {
-            var action  = this.value;
-
-            this.value = '';
-
-            AppScope.TaskService.getAll(
-                function (taskList) {
-                    for (var i = 0; i < taskList.length; i++) {
-                        var el = taskList[i];
-
-                        if (el.isChecked) {
-                            switch (action) {
-                                case 'delete':
-                                    AppScope.TaskService.deleteElement(
-                                        el,
-                                        function (el) {
-                                            var $li = getElementNode(el);
-
-                                            $taskList.removeChild($li);
-                                        }
-                                    );
-
-                                    break;
-                                case 'complete':
-                                    AppScope.TaskService.markAs(
-                                        el,
-                                        AppScope.TaskStatusEnum.COMPLETED_TASK,
-                                        function (el) {
-                                            AppScope.TaskService.toggleIsChecked(el, function () {
-                                                renderElement(el);
-                                            });
-                                        }
-                                    );
-
-                                    break;
-                                case 'active':
-                                    AppScope.TaskService.markAs(
-                                        el,
-                                        AppScope.TaskStatusEnum.ACTIVE_TASK,
-                                        function (el) {
-                                            AppScope.TaskService.toggleIsChecked(el, function () {
-                                                renderElement(el);
-                                            });
-                                        }
-                                    );
-
-                                    break;
-                            }
-                        }
-                    }
-                }
-            );
-        };
-        $taskListMassUpdate.addEventListener('change', massUpdateListener, false);
-
-        filterListener = function (event) {
-            var filter  = this.value;
-
-            if (filter) {
-                window.location.hash = '#' + filter;
-            } else {
-                history.replaceState({}, document.title, ".");
-            }
-            filterTaskList();
-        };
-        $taskListFilter.addEventListener('change', filterListener, false);
+        $listNewValue.addEventListener('keyup', onTaskCreate, false);
+        $list.addEventListener('click', onTaskUpdate, false);
+        $listBatchUpdate.addEventListener('change', onBatchUpdate, false);
+        $listFilter.addEventListener('change', onListFilter, false);
     }
 
-    function loadTaskList() {
+    function onTaskCreate(event) {
+        if (event.keyCode == 13) {
+            var task = TaskService.createTask(this.value),
+                $li = renderTask(task);
+
+            $list.insertBefore($li, $listFooter);
+            $listNewValue.value = '';
+        }
+    }
+
+    function onTaskUpdate(event) {
+        var $li,
+            task;
+
+        if (event.target.className.indexOf('todo-list-item-check') != -1) {
+            $li = event.target.parentNode.parentNode.parentNode;
+            task = TaskService.getTask($li.id);
+
+            TaskService.toggleTaskIsChecked(task);
+        } else if (event.target.className.indexOf('todo-list-item-mark-as-complete') != -1) {
+            $li = event.target.parentNode.parentNode;
+            task = TaskService.getTask($li.id);
+
+            TaskService.markTaskAs(task, AppScope.TaskStatusEnum.COMPLETED_TASK);
+            renderTask(task);
+        } else if (event.target.className.indexOf('todo-list-item-delete') != -1) {
+            $li = event.target.parentNode.parentNode;
+            task = TaskService.getTask($li.id);
+
+            TaskService.deleteTask(task);
+            $list.removeChild($li);
+        } else if (event.target.className.indexOf('todo-list-item-mark-as-active') != -1) {
+            $li = event.target.parentNode.parentNode;
+            task = TaskService.getTask($li.id);
+
+            TaskService.markTaskAs(task,AppScope.TaskStatusEnum.ACTIVE_TASK);
+            renderTask(task);
+        }
+    }
+
+    function onBatchUpdate() {
+        var action = this.value,
+            list = TaskService.getList();
+
+        switch (action) {
+            case 'delete':
+                for (var i = 0; i < list.length; i++) {
+                    var task = list[i];
+
+                    if (task.isChecked) {
+                        var $li = document.getElementById(task.id);
+
+                        TaskService.deleteTask(task);
+                        $list.removeChild($li);
+                    }
+                }
+
+                break;
+            case 'complete':
+                for (var i = 0; i < list.length; i++) {
+                    var task = list[i];
+
+                    if (task.isChecked) {
+                        TaskService.markTaskAs(task, AppScope.TaskStatusEnum.COMPLETED_TASK);
+                        TaskService.toggleTaskIsChecked(task);
+                        renderTask(task);
+                    }
+                }
+
+                break;
+            case 'active':
+                for (var i = 0; i < list.length; i++) {
+                    var task = list[i];
+
+                    if (task.isChecked) {
+                        TaskService.markTaskAs(task, AppScope.TaskStatusEnum.ACTIVE_TASK);
+                        TaskService.toggleTaskIsChecked(task);
+                        renderTask(task);
+                    }
+                }
+
+                break;
+        }
+
+        this.value = '';
+    }
+
+    function onListFilter(event) {
+        var filter  = this.value;
+
+        if (filter) {
+            window.location.hash = '#' + filter;
+        } else {
+            history.replaceState({}, document.title, ".");
+        }
+
+        filterList();
+    }
+
+    function loadList() {
         if (!isInitialized) {
             return;
         }
 
-        AppScope.TaskService.getAll(
-            function (taskList) {
-                renderList(taskList);
-            }
-        );
+        var list = TaskService.getList();
+        renderList(list);
     }
 
-    function filterTaskList() {
-        var filter = window.location.hash.replace('#', '');
+    function renderList(list) {
+        for (var i = 0; i < list.length; i++) {
+            var task = list[i],
+                $li = renderTask(task);
 
-        $taskList.className = $taskList.className.replace(/(\stodo-list-filter-active)?(\stodo-list-filter-complete)?/g, '');
-        if (filter) {
-            $taskList.className += ' todo-list-filter-' + filter;
+            $list.insertBefore($li, $listFooter);
+        }
+    }
+
+    function renderTask(task) {
+        var $li,
+            liClassName,
+            actionClassName;
+
+        if (task) {
+            $li = task.id ? document.getElementById(task.id) : null;
         }
 
-        $taskListFilter.value = filter;
+        if (!$li) {
+            $li = document.createElement('li');
+            $li.id = task.id;
+        }
+
+        if (task.status === AppScope.TaskStatusEnum.ACTIVE_TASK) {
+            liClassName = 'list-group-item-warning';
+            actionClassName = 'glyphicon glyphicon-ok todo-list-item-mark-as-complete';
+        } else if (task.status === AppScope.TaskStatusEnum.COMPLETED_TASK) {
+            liClassName = 'list-group-item-success';
+            actionClassName = 'glyphicon glyphicon-repeat todo-list-item-mark-as-active';
+        }
+
+        $li.className = 'todo-list-item list-group-item ' + liClassName;
+        $li.innerHTML = '<div>' +
+            '<span class="todo-list-title"><input type="checkbox" class="todo-list-item-check"' + (task.isChecked ? 'checked' : '') + '>' + task.value + '</span>' +
+            '<span class="todo-list-item-delete glyphicon glyphicon-remove"></span>' +
+            '<span class="glyphicon ' + actionClassName + '"></span>' +
+            '</div>';
+
+        return $li;
     }
 
-    function closeStaticContentListeners() {
-        $taskListNewValue.removeEventListener('keyup', createTaskListener, false);
-        $taskList.removeEventListener('click', updateTaskListener, false);
-        $taskListMassUpdate.removeEventListener('change', massUpdateListener, false);
-        $taskListFilter.removeEventListener('change', filterListener, false);
+    function filterList() {
+        var filter = window.location.hash.replace('#', '');
+
+        $list.className = $list.className.replace(/(\stodo-list-filter-active)?(\stodo-list-filter-complete)?/g, '');
+        if (filter) {
+            $list.className += ' todo-list-filter-' + filter;
+        }
+
+        $listFilter.value = filter;
     }
 
     function close() {
         if (isInitialized) {
             isInitialized = false;
 
+            document.removeEventListener('taskServiceInitialize', onServiceInitialize, false);
+
             closeStaticContentListeners();
         }
+    }
+
+    function closeStaticContentListeners() {
+        $listNewValue.removeEventListener('keyup', onTaskCreate, false);
+        $list.removeEventListener('click', onTaskUpdate, false);
+        $listBatchUpdate.removeEventListener('change', onBatchUpdate, false);
+        $listFilter.removeEventListener('change', onListFilter, false);
     }
 
     return {

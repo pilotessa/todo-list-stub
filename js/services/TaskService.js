@@ -12,47 +12,58 @@ AppScope.TaskService = (function () {
         } else {
             storage = AppScope.TaskLocalStorage;
         }
+
+        storage.initialize(
+            function () {
+                var event = new Event('taskServiceInitialize');
+
+                document.dispatchEvent(event);
+            },
+            function (e) {
+                throw new Error(e.message);
+            }
+        );
     }
 
-    function getAll(onSuccess) {
-        storage.getAll(onSuccess);
+    function getList() {
+        return storage.getList();
     }
 
-    function createElement(value, onSuccess) {
-        var el = new AppScope.Task();
+    function createTask(value) {
+        var task = new AppScope.Task();
 
-        el.value = value;
-        el.status = AppScope.TaskStatusEnum.ACTIVE_TASK;
-        el.isChecked = false;
+        task.value = value;
+        task.status = AppScope.TaskStatusEnum.ACTIVE_TASK;
+        task.isChecked = false;
 
-        storage.createElement(el, onSuccess);
+        return storage.createTask(task);
     }
 
-    function getElement(id, onSuccess) {
-        storage.getElement(id, onSuccess);
+    function getTask(id) {
+        return storage.getTask(id);
     }
 
-    function deleteElement(el, onSuccess) {
-        storage.deleteElement(el, onSuccess);
+    function deleteTask(task) {
+        return storage.deleteTask(task);
     }
 
-    function markAs(el, status, onSuccess) {
-        el.status = status;
-        storage.updateElement(el, onSuccess);
+    function markTaskAs(task, status) {
+        task.status = status;
+        return storage.updateTask(task);
     }
 
-    function toggleIsChecked(el, onSuccess) {
-        el.isChecked = !el.isChecked;
-        storage.updateElement(el, onSuccess);
+    function toggleTaskIsChecked(task) {
+        task.isChecked = !task.isChecked;
+        return storage.updateTask(task);
     }
 
     return {
         initialize: initialize,
-        getAll: getAll,
-        createElement: createElement,
-        getElement: getElement,
-        deleteElement: deleteElement,
-        markAs: markAs,
-        toggleIsChecked: toggleIsChecked
+        getList: getList,
+        createTask: createTask,
+        getTask: getTask,
+        deleteTask: deleteTask,
+        markTaskAs: markTaskAs,
+        toggleTaskIsChecked: toggleTaskIsChecked
     }
 })();

@@ -99,15 +99,21 @@ AppScope.TaskLocalStorage = (function () {
         var taskListJson = [],
             taskListStringified;
 
-        for (var i = 0; i < _data.length; i++) {
-            taskListJson.push(_data[i].toJSON());
-        }
+        try {
+            for (var i = 0; i < _data.length; i++) {
+                taskListJson.push(_data[i].toJSON());
+            }
 
-        taskListStringified = JSON.stringify(taskListJson);
-        localStorage.setItem(TASKS_KEY, taskListStringified);
+            taskListStringified = JSON.stringify(taskListJson);
+            localStorage.setItem(TASKS_KEY, taskListStringified);
 
-        if (onSuccess) {
-            onSuccess(_data);
+            if (onSuccess) {
+                onSuccess(_data);
+            }
+        } catch (e) {
+            if (onError) {
+                onError(e);
+            }
         }
     }
 

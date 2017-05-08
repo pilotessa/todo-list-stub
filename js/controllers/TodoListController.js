@@ -15,21 +15,23 @@ AppScope.TodoListController = (function () {
         $listFilter;
 
     function initialize(wrapperId) {
-        if (!wrapperId) {
-            throw new Error("List ID is undefined");
+        if (!isInitialized) {
+            if (!wrapperId) {
+                throw new Error("List ID is undefined");
+            }
+
+            isInitialized = true;
+            listWrapperId = wrapperId;
+
+            document.addEventListener('taskServiceInitialize', onServiceInitialize, false);
         }
 
-        listWrapperId = wrapperId;
-
         // Initialize Service / Caches
-        document.addEventListener('taskServiceInitialize', onServiceInitialize, false);
-        AppScope.TaskService.initialize(onServiceInitialize);
+        TaskService.initialize();
     }
 
-    function  onServiceInitialize() {
-        if (!isInitialized) {
-            isInitialized = true;
-
+    function onServiceInitialize() {
+        if (!$listWrapper) {
             renderStaticContent();
             initStaticContentListeners();
         }

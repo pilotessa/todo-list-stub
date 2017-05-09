@@ -4,8 +4,9 @@ if (!!!AppScope) {
 
 AppScope.TodoListController = (function () {
 
-    var TaskService = AppScope.TaskService,
-        isInitialized,
+    var Task = AppScope.Task,
+        TaskStatusEnum = AppScope.TaskStatusEnum,
+        TaskService = AppScope.TaskService,
         listWrapperId,
         $listWrapper,
         $list,
@@ -15,18 +16,16 @@ AppScope.TodoListController = (function () {
         $listFilter;
 
     function initialize(wrapperId) {
-        if (!isInitialized) {
-            if (!wrapperId) {
-                throw new Error("List ID is undefined");
-            }
-
-            isInitialized = true;
-            listWrapperId = wrapperId;
-
-            document.addEventListener('taskServiceInitialize', onServiceInitialize, false);
+        if (!wrapperId) {
+            throw new Error("List ID is undefined");
         }
+        listWrapperId = wrapperId;
 
-        // Initialize Service / Caches
+        initTaskService();
+    }
+
+    function initTaskService() {
+        document.addEventListener('taskServiceInitialize', onServiceInitialize, false);
         TaskService.initialize();
     }
 
@@ -80,9 +79,15 @@ AppScope.TodoListController = (function () {
 
     function onTaskCreate(event) {
         if (event.keyCode == 13) {
-            var task = TaskService.createTask(this.value),
-                $li = renderTask(task);
+            var task = new Task(),
+                $li;
 
+            task.value = this.value;
+            task.status = TaskStatusEnum.ACTIVE_TASK;
+            task.isChecked = false;
+            task.id = TaskService.createTask(task);
+
+            $li = renderTask(task);
             $list.insertBefore($li, $listFooter);
             $listNewValue.value = '';
         }
@@ -96,41 +101,49 @@ AppScope.TodoListController = (function () {
             $li = event.target.parentNode.parentNode.parentNode;
             task = TaskService.getTask($li.id);
 
-            TaskService.toggleTaskIsChecked(task);
+            task.isChecked = !task.isChecked;
+            TaskService.updateTask(task);
         } else if (event.target.className.indexOf('todo-list-item-mark-as-complete') != -1) {
             $li = event.target.parentNode.parentNode;
             task = TaskService.getTask($li.id);
 
-            TaskService.markTaskAs(task, AppScope.TaskStatusEnum.COMPLETED_TASK);
+            task.status = TaskStatusEnum.COMPLETED_TASK;
+            TaskService.updateTask(task);
+
             renderTask(task);
         } else if (event.target.className.indexOf('todo-list-item-delete') != -1) {
             $li = event.target.parentNode.parentNode;
             task = TaskService.getTask($li.id);
 
             TaskService.deleteTask(task);
+
             $list.removeChild($li);
         } else if (event.target.className.indexOf('todo-list-item-mark-as-active') != -1) {
             $li = event.target.parentNode.parentNode;
             task = TaskService.getTask($li.id);
 
-            TaskService.markTaskAs(task,AppScope.TaskStatusEnum.ACTIVE_TASK);
+            task.status = TaskStatusEnum.ACTIVE_TASK;
+            TaskService.updateTask(task);
+
             renderTask(task);
         }
     }
 
     function onBatchUpdate() {
         var action = this.value,
-            list = TaskService.getList();
+            list = TaskService.getList(),
+            task;
 
         switch (action) {
             case 'delete':
                 for (var i = 0; i < list.length; i++) {
-                    var task = list[i];
+                    task = list[i];
 
                     if (task.isChecked) {
                         var $li = document.getElementById(task.id);
 
                         TaskService.deleteTask(task);
+
                         $list.removeChild($li);
                     }
                 }
@@ -138,11 +151,13 @@ AppScope.TodoListController = (function () {
                 break;
             case 'complete':
                 for (var i = 0; i < list.length; i++) {
-                    var task = list[i];
+                    task = list[i];
 
                     if (task.isChecked) {
-                        TaskService.markTaskAs(task, AppScope.TaskStatusEnum.COMPLETED_TASK);
-                        TaskService.toggleTaskIsChecked(task);
+                        task.status = TaskStatusEnum.COMPLETED_TASK;
+                        task.isChecked = false;
+                        TaskService.updateTask(task);
+
                         renderTask(task);
                     }
                 }
@@ -150,11 +165,13 @@ AppScope.TodoListController = (function () {
                 break;
             case 'active':
                 for (var i = 0; i < list.length; i++) {
-                    var task = list[i];
+                    task = list[i];
 
                     if (task.isChecked) {
-                        TaskService.markTaskAs(task, AppScope.TaskStatusEnum.ACTIVE_TASK);
-                        TaskService.toggleTaskIsChecked(task);
+                        task.status = TaskStatusEnum.ACTIVE_TASK;
+                        task.isChecked = false;
+                        TaskService.updateTask(task);
+
                         renderTask(task);
                     }
                 }
@@ -178,11 +195,8 @@ AppScope.TodoListController = (function () {
     }
 
     function loadList() {
-        if (!isInitialized) {
-            return;
-        }
-
         var list = TaskService.getList();
+
         renderList(list);
     }
 
@@ -209,10 +223,10 @@ AppScope.TodoListController = (function () {
             $li.id = task.id;
         }
 
-        if (task.status === AppScope.TaskStatusEnum.ACTIVE_TASK) {
+        if (task.status === TaskStatusEnum.ACTIVE_TASK) {
             liClassName = 'list-group-item-warning';
             actionClassName = 'glyphicon glyphicon-ok todo-list-item-mark-as-complete';
-        } else if (task.status === AppScope.TaskStatusEnum.COMPLETED_TASK) {
+        } else if (task.status === TaskStatusEnum.COMPLETED_TASK) {
             liClassName = 'list-group-item-success';
             actionClassName = 'glyphicon glyphicon-repeat todo-list-item-mark-as-active';
         }
@@ -239,13 +253,12 @@ AppScope.TodoListController = (function () {
     }
 
     function close() {
-        if (isInitialized) {
-            isInitialized = false;
+        closeTaskService();
+        closeStaticContentListeners();
+    }
 
-            document.removeEventListener('taskServiceInitialize', onServiceInitialize, false);
-
-            closeStaticContentListeners();
-        }
+    function closeTaskService() {
+        document.removeEventListener('taskServiceInitialize', onServiceInitialize, false);
     }
 
     function closeStaticContentListeners() {

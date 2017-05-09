@@ -4,57 +4,103 @@ if (!!!AppScope) {
 
 AppScope.TaskService = (function () {
 
-    var storage;
+    var isInitialized,
+        _storage,
+        _data;
 
     function initialize() {
-        if (AppScope.config.storage == "serverApi") {
-            storage = AppScope.ServerApi;
-        } else {
-            storage = AppScope.TaskLocalStorage;
-        }
-
-        storage.initialize(
-            function () {
-                var event = new Event('taskServiceInitialize');
-
-                document.dispatchEvent(event);
-            },
-            function (e) {
-                throw new Error(e.message);
+        if (!isInitialized) {
+            if (AppScope.config.storage == "serverApi") {
+                _storage = AppScope.ServerApi;
+            } else {
+                _storage = AppScope.TaskLocalStorage;
             }
-        );
+
+            _storage.readData(
+                function (data) {
+                    isInitialized = true;
+                    _data = data;
+
+                    var event = new Event('taskServiceInitialize');
+                    document.dispatchEvent(event);
+                },
+                function (e) {
+                    throw new Error(e.message);
+                }
+            );
+        }
     }
 
     function getList() {
-        return storage.getList();
+        if (!isInitialized) {
+            return;
+        }
+
+        return _data;
     }
 
-    function createTask(value) {
-        var task = new AppScope.Task();
+    function createTask(task) {
+        if (!isInitialized) {
+            return;
+        }
 
-        task.value = value;
-        task.status = AppScope.TaskStatusEnum.ACTIVE_TASK;
-        task.isChecked = false;
+        var i = _data.length;
 
-        return storage.createTask(task);
+        task.isChanged = true;
+        _data[i] = task;
+        _storage.updateData(_data);
+
+        return _data[i].id;
     }
 
     function getTask(id) {
-        return storage.getTask(id);
+        if (!isInitialized) {
+            return;
+        }
+
+        for (var i = 0; i < _data.length; i++) {
+            var task = _data[i];
+
+            if (task.id === id) {
+                return task;
+            }
+        }
+
+        return null;
+    }
+
+    function updateTask(task) {
+        if (!isInitialized) {
+            return;
+        }
+
+        for (var i = 0; i < _data.length; i++) {
+            if (_data[i].id === task.id) {
+                _data[i].isChanged = true;
+                _storage.updateData(_data);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     function deleteTask(task) {
-        return storage.deleteTask(task);
-    }
+        if (!isInitialized) {
+            return;
+        }
 
-    function markTaskAs(task, status) {
-        task.status = status;
-        return storage.updateTask(task);
-    }
+        for (var i = 0; i < _data.length; i++) {
+            if (_data[i].id === task.id) {
+                _data[i].isDeleted = true;
+                _storage.updateData(_data);
 
-    function toggleTaskIsChecked(task) {
-        task.isChecked = !task.isChecked;
-        return storage.updateTask(task);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     return {
@@ -62,8 +108,7 @@ AppScope.TaskService = (function () {
         getList: getList,
         createTask: createTask,
         getTask: getTask,
-        deleteTask: deleteTask,
-        markTaskAs: markTaskAs,
-        toggleTaskIsChecked: toggleTaskIsChecked
+        updateTask: updateTask,
+        deleteTask: deleteTask
     }
 })();

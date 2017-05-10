@@ -7,6 +7,7 @@ AppScope.TodoListController = (function () {
     var Task = AppScope.Task,
         TaskStatusEnum = AppScope.TaskStatusEnum,
         TaskService = AppScope.TaskService,
+        DomUtils = AppScope.DomUtils,
         listWrapperId,
         $listWrapper,
         $list,
@@ -97,13 +98,13 @@ AppScope.TodoListController = (function () {
         var $li,
             task;
 
-        if (event.target.className.indexOf('todo-list-item-check') != -1) {
+        if (DomUtils.hasClass(event.target, 'todo-list-item-check')) {
             $li = event.target.parentNode.parentNode.parentNode;
             task = TaskService.getTask($li.id);
 
             task.isChecked = !task.isChecked;
             TaskService.updateTask(task);
-        } else if (event.target.className.indexOf('todo-list-item-mark-as-complete') != -1) {
+        } else if (DomUtils.hasClass(event.target, 'todo-list-item-mark-as-complete')) {
             $li = event.target.parentNode.parentNode;
             task = TaskService.getTask($li.id);
 
@@ -111,14 +112,14 @@ AppScope.TodoListController = (function () {
             TaskService.updateTask(task);
 
             renderTask(task);
-        } else if (event.target.className.indexOf('todo-list-item-delete') != -1) {
+        } else if (DomUtils.hasClass(event.target, 'todo-list-item-delete')) {
             $li = event.target.parentNode.parentNode;
             task = TaskService.getTask($li.id);
 
             TaskService.deleteTask(task);
 
             $list.removeChild($li);
-        } else if (event.target.className.indexOf('todo-list-item-mark-as-active') != -1) {
+        } else if (DomUtils.hasClass(event.target, 'todo-list-item-mark-as-active')) {
             $li = event.target.parentNode.parentNode;
             task = TaskService.getTask($li.id);
 

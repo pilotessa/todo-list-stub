@@ -9,16 +9,14 @@ AppScope.TaskLocalStorage = (function () {
 
     function readData(onSuccess, onError) {
         try {
-            var taskListStringified = localStorage.getItem(TASKS_KEY),
-                taskList = taskListStringified ? JSON.parse(taskListStringified.trim()) : [],
-                data = [];
+            var taskListStringified = localStorage.getItem(TASKS_KEY) || "[]",
+                taskList = JSON.parse(taskListStringified.trim());
 
             taskList = Array.isArray(taskList) ? taskList : [taskList];
-            for (var i = 0; i < taskList.length; i++) {
-                var taskJson = taskList[i];
 
-                data.push(new Task().fromJSON(taskJson));
-            }
+            var data = taskList.map(function (taskJson) {
+                return new Task().fromJSON(taskJson);
+            });
 
             if (onSuccess) {
                 onSuccess(data);
@@ -31,28 +29,16 @@ AppScope.TaskLocalStorage = (function () {
     }
 
     function updateData(data, onSuccess, onError) {
-        var taskListJson = [],
-            taskListStringified;
-
         try {
-            for (var i = 0; i < data.length; i++) {
-                var task = data[i];
-
-                if (task.isDeleted) {
-                    continue;
-                }
-                if (task.isChanged) {
-                    if (!task.id) {
-                        task.id = '_' + Math.random().toString(36).substr(2, 9);
-                    }
-
-                    delete(task.isChanged);
+            var taskListJson = data.map(function (task) {
+                if (!task.id) {
+                    task.id = '_' + Math.random().toString(36).substr(2, 9);
                 }
 
-                taskListJson.push(task.toJSON());
-            }
-
+                return task.toJSON();
+            }),
             taskListStringified = JSON.stringify(taskListJson);
+
             localStorage.setItem(TASKS_KEY, taskListStringified);
 
             if (onSuccess) {

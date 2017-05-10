@@ -46,7 +46,6 @@ AppScope.TaskService = (function () {
 
         var i = _data.length;
 
-        task.isChanged = true;
         _data[i] = task;
         _storage.updateData(_data);
 
@@ -76,7 +75,7 @@ AppScope.TaskService = (function () {
 
         for (var i = 0; i < _data.length; i++) {
             if (_data[i].id === task.id) {
-                _data[i].isChanged = true;
+                _data[i] = task;
                 _storage.updateData(_data);
 
                 return true;
@@ -93,7 +92,7 @@ AppScope.TaskService = (function () {
 
         for (var i = 0; i < _data.length; i++) {
             if (_data[i].id === task.id) {
-                _data[i].isDeleted = true;
+                _data.splice(i, 1);
                 _storage.updateData(_data);
 
                 return true;

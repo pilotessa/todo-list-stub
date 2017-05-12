@@ -3,14 +3,14 @@ if (!!!AppScope) {
 }
 
 AppScope.TaskService = (function () {
-
-    var isInitialized,
+    var DomService = AppScope.DomService,
+        isInitialized,
         _storage,
         _data;
 
     function initialize() {
         if (!isInitialized) {
-            if (AppScope.config.storage == "serverApi") {
+            if (AppScope.config.storage == 'serverApi') {
                 _storage = AppScope.ServerApi;
             } else {
                 _storage = AppScope.TaskLocalStorage;
@@ -21,8 +21,7 @@ AppScope.TaskService = (function () {
                     isInitialized = true;
                     _data = data;
 
-                    var event = new Event('taskServiceInitialize');
-                    document.dispatchEvent(event);
+                    DomService.trigger(document, 'taskServiceInitialize');
                 },
                 function (e) {
                     throw new Error(e.message);
@@ -36,7 +35,7 @@ AppScope.TaskService = (function () {
             return;
         }
 
-        return _data;
+        return _data.slice(0);
     }
 
     function createTask(task) {

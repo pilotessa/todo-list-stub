@@ -19,9 +19,13 @@
     </div>
 </div>
 
+<!--Importing vendor libraries-->
+<script src="js/vendor/jquery-3.2.1.min.js"></script>
+
 <!--Importing all constants & utils-->
 <script src="js/constants/localStorageConstants.js"></script>
-<script src="js/utils/DomUtils.js"></script>
+<script src="js/modules/vanilla/utils/DomUtils.js"></script>
+<script src="js/modules/jquery/utils/DomUtils.js"></script>
 
 <!--Importing all models-->
 <script src="js/models/Task.js"></script>
@@ -31,6 +35,7 @@
 <script src="js/dao/TaskLocalStorage.js"></script>
 
 <!--Importing all services-->
+<script src="js/services/DomService.js"></script>
 <script src="js/services/TaskService.js"></script>
 
 <!--Importing all controllers-->

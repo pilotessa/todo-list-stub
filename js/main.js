@@ -3,7 +3,8 @@ if (!!!AppScope) {
 }
 
 AppScope.config = {
-    storage: 'localStorage'
+    storage: 'localStorage',
+    domUtils: 'vanilla'
 };
 
 // Initialize Page controller

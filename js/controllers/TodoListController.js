@@ -37,10 +37,10 @@ AppScope.TodoListController = (function () {
     }
 
     function initStaticContentListeners() {
-        DomService.addListener(AppScope.domElements.$newValue, 'keyup', onTaskCreate);
-        DomService.addListener(AppScope.domElements.$list, 'click', onTaskUpdate);
-        DomService.addListener(AppScope.domElements.$batchUpdate, 'change', onBatchUpdate);
-        DomService.addListener(AppScope.domElements.$filter, 'change', onListFilter);
+        DomService.addListener(AppScope.domElements.newValue, 'keyup', onTaskCreate);
+        DomService.addListener(AppScope.domElements.list, 'click', onTaskUpdate);
+        DomService.addListener(AppScope.domElements.batchUpdate, 'change', onBatchUpdate);
+        DomService.addListener(AppScope.domElements.filter, 'change', onListFilter);
     }
 
     function onTaskCreate(event) {
@@ -53,38 +53,38 @@ AppScope.TodoListController = (function () {
             task.id = TaskService.createTask(task);
 
             ViewRenderer.renderTask(task);
-            AppScope.domElements.$newValue.value = '';
+            AppScope.domElements.newValue.value = '';
         }
     }
 
     function onTaskUpdate(event) {
-        var $li,
+        var li,
             task;
 
         if (DomService.hasClass(event.target, 'todo-list-item-check')) {
-            $li = event.target.parentNode.parentNode.parentNode;
-            task = TaskService.getTask($li.id);
+            li = event.target.parentNode.parentNode.parentNode;
+            task = TaskService.getTask(li.id);
 
             task.isChecked = !task.isChecked;
             TaskService.updateTask(task);
         } else if (DomService.hasClass(event.target, 'todo-list-item-mark-as-complete')) {
-            $li = event.target.parentNode.parentNode;
-            task = TaskService.getTask($li.id);
+            li = event.target.parentNode.parentNode;
+            task = TaskService.getTask(li.id);
 
             task.status = TaskStatusEnum.COMPLETED_TASK;
             TaskService.updateTask(task);
 
             ViewRenderer.renderTask(task);
         } else if (DomService.hasClass(event.target, 'todo-list-item-delete')) {
-            $li = event.target.parentNode.parentNode;
-            task = TaskService.getTask($li.id);
+            li = event.target.parentNode.parentNode;
+            task = TaskService.getTask(li.id);
 
             TaskService.deleteTask(task);
 
-            AppScope.domElements.$list.removeChild($li);
+            AppScope.domElements.list.removeChild(li);
         } else if (DomService.hasClass(event.target, 'todo-list-item-mark-as-active')) {
-            $li = event.target.parentNode.parentNode;
-            task = TaskService.getTask($li.id);
+            li = event.target.parentNode.parentNode;
+            task = TaskService.getTask(li.id);
 
             task.status = TaskStatusEnum.ACTIVE_TASK;
             TaskService.updateTask(task);
@@ -104,11 +104,11 @@ AppScope.TodoListController = (function () {
                     task = list[i];
 
                     if (task.isChecked) {
-                        var $li = DomService.getById(task.id);
+                        var li = DomService.getById(task.id);
 
                         TaskService.deleteTask(task);
 
-                        AppScope.domElements.$list.removeChild($li);
+                        AppScope.domElements.list.removeChild(li);
                     }
                 }
 
@@ -167,13 +167,13 @@ AppScope.TodoListController = (function () {
     function filterList() {
         var filter = window.location.hash.replace('#', '');
 
-        DomService.removeClass(AppScope.domElements.$list, 'todo-list-filter-active');
-        DomService.removeClass(AppScope.domElements.$list, 'todo-list-filter-complete');
+        DomService.removeClass(AppScope.domElements.list, 'todo-list-filter-active');
+        DomService.removeClass(AppScope.domElements.list, 'todo-list-filter-complete');
         if (filter) {
-            DomService.addClass(AppScope.domElements.$list, 'todo-list-filter-' + filter);
+            DomService.addClass(AppScope.domElements.list, 'todo-list-filter-' + filter);
         }
 
-        AppScope.domElements.$filter.value = filter;
+        AppScope.domElements.filter.value = filter;
     }
 
     function close() {
@@ -186,10 +186,10 @@ AppScope.TodoListController = (function () {
     }
 
     function closeStaticContentListeners() {
-        DomService.removeListener(AppScope.domElements.$newValue, 'keyup', onTaskCreate);
-        DomService.removeListener(AppScope.domElements.$list, 'click', onTaskUpdate);
-        DomService.removeListener(AppScope.domElements.$batchUpdate, 'change', onBatchUpdate);
-        DomService.removeListener(AppScope.domElements.$filter, 'change', onListFilter);
+        DomService.removeListener(AppScope.domElements.newValue, 'keyup', onTaskCreate);
+        DomService.removeListener(AppScope.domElements.list, 'click', onTaskUpdate);
+        DomService.removeListener(AppScope.domElements.batchUpdate, 'change', onBatchUpdate);
+        DomService.removeListener(AppScope.domElements.filter, 'change', onListFilter);
     }
 
     return {

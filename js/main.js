@@ -4,7 +4,7 @@ if (!!!AppScope) {
 
 AppScope.config = {
     storage: 'localStorage',
-    module: 'vanilla'
+    module: 'jQuery'
 };
 
 // Initialize Page controller

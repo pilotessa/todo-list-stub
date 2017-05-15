@@ -1,17 +1,17 @@
 if (!!!AppScope) {
     var AppScope = {}
 }
-if (!!!AppScope.Vanilla) {
-    AppScope.Vanilla = {}
+if (!!!AppScope.JQuery) {
+    AppScope.JQuery = {}
 }
 
-AppScope.Vanilla.View = (function () {
+AppScope.JQuery.View = (function () {
     var TaskStatusEnum = AppScope.TaskStatusEnum,
-        footer;
+        $footer;
 
     function renderStaticContent(wrapperId) {
-        var wrapper = document.getElementById(wrapperId);
-        if (!wrapper) {
+        var $wrapper = $('#' + wrapperId);
+        if (!$wrapper.length) {
             throw new Error("List container is missing");
         }
 
@@ -35,14 +35,14 @@ AppScope.Vanilla.View = (function () {
             '</li>' +
             '</ul>';
 
-        wrapper.innerHTML = content;
+        $wrapper.html(content);
 
-        footer = wrapper.getElementsByClassName('todo-list-footer')[0];
+        $footer = $wrapper.find('.todo-list-footer');
         AppScope.domElements = {
-            list: wrapper.getElementsByClassName('todo-list')[0],
-            newValue: wrapper.getElementsByClassName('todo-list-new-item-value')[0],
-            batchUpdate: wrapper.getElementsByClassName('todo-list-batch-update')[0],
-            filter: wrapper.getElementsByClassName('todo-list-filter')[0]
+            list: $wrapper.find('.todo-list')[0],
+            newValue: $wrapper.find('.todo-list-new-item-value')[0],
+            batchUpdate: $wrapper.find('.todo-list-batch-update')[0],
+            filter: $wrapper.find('.todo-list-filter')[0]
         };
     }
 
@@ -55,15 +55,13 @@ AppScope.Vanilla.View = (function () {
     }
 
     function renderTask(task) {
-        var li,
+        var $li,
             liClassName,
             actionClassName;
 
-        li = task.id ? document.getElementById(task.id) : null;
-        if (!li) {
-            li = document.createElement('li');
-            li.id = task.id;
-            AppScope.domElements.list.insertBefore(li, footer);
+        $li = task.id ? $('#' + task.id) : null;
+        if (!$li || !$li.length) {
+            $li = $('<li id="' + task.id + '"></li>').insertBefore($footer);
         }
 
         if (task.status === TaskStatusEnum.ACTIVE_TASK) {
@@ -74,12 +72,12 @@ AppScope.Vanilla.View = (function () {
             actionClassName = 'glyphicon glyphicon-repeat todo-list-item-mark-as-active';
         }
 
-        li.className = 'todo-list-item list-group-item ' + liClassName;
-        li.innerHTML = '<div>' +
+        $li.removeClass().addClass('todo-list-item').addClass('list-group-item').addClass(liClassName);
+        $li.html('<div>' +
             '<span class="todo-list-title"><input type="checkbox" class="todo-list-item-check"' + (task.isChecked ? 'checked' : '') + '>' + task.value + '</span>' +
             '<span class="todo-list-item-delete glyphicon glyphicon-remove"></span>' +
             '<span class="glyphicon ' + actionClassName + '"></span>' +
-            '</div>';
+            '</div>');
     }
 
     return {

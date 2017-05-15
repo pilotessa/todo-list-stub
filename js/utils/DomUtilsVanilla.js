@@ -1,11 +1,8 @@
 if (!!!AppScope) {
     var AppScope = {}
 }
-if (!!!AppScope.Vanilla) {
-    AppScope.Vanilla = {}
-}
 
-AppScope.Vanilla.DomUtils = (function () {
+AppScope.DomUtilsVanilla = (function () {
     function hasClass(target, className) {
         return target.className.indexOf(className) != -1;
     }

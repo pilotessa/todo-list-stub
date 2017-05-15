@@ -7,9 +7,9 @@ AppScope.DomService = (function () {
 
     function initialize() {
         if (AppScope.config.module == 'jQuery') {
-            _domUtils = AppScope.JQuery.DomUtils;
+            _domUtils = AppScope.DomUtilsJQuery;
         } else {
-            _domUtils = AppScope.Vanilla.DomUtils;
+            _domUtils = AppScope.DomUtilsVanilla;
         }
     }
 
@@ -29,6 +29,26 @@ AppScope.DomService = (function () {
         return _domUtils.getById(id);
     }
 
+    function getByClass(className, parent) {
+        return _domUtils.getByClass(className, parent);
+    }
+
+    function create(tag) {
+        return _domUtils.create(tag);
+    }
+
+    function insertBefore(itemToInsert, tagret) {
+        _domUtils.insertBefore(itemToInsert, tagret);
+    }
+
+    function setInnerHtml(target, content) {
+        _domUtils.setInnerHtml(target, content);
+    }
+
+    function setOuterHtml(target, content) {
+        _domUtils.setOuterHtml(target, content);
+    }
+
     function addListener(target, eventName, handler) {
         _domUtils.addListener(target, eventName, handler);
     }
@@ -43,6 +63,11 @@ AppScope.DomService = (function () {
         addClass: addClass,
         removeClass: removeClass,
         getById: getById,
+        getByClass: getByClass,
+        create: create,
+        insertBefore: insertBefore,
+        setInnerHtml: setInnerHtml,
+        setOuterHtml: setOuterHtml,
         addListener: addListener,
         removeListener: removeListener
     }

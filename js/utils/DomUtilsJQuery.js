@@ -1,59 +1,54 @@
 if (!!!AppScope) {
     var AppScope = {}
 }
-if (!!!AppScope.Vanilla) {
-    AppScope.Vanilla = {}
-}
 
-AppScope.Vanilla.DomUtils = (function () {
+AppScope.DomUtilsJQuery = (function () {
     function hasClass(target, className) {
-        return target.className.indexOf(className) != -1;
+        return $(target).hasClass(className);
     }
 
     function addClass(target, className) {
-        target.className += (target.className ? ' ' : '') + className;
+        $(target).addClass(className);
     }
 
     function removeClass(target, className) {
-        var rx = new RegExp('(' + className + ')?', 'g');
-
-        target.className = target.className.replace(rx, '');
+        $(target).removeClass(className);
     }
 
     function getById(id) {
-        return document.getElementById(id);
+        var result  = $('#' + id);
+
+        return result.length ? result[0] : null;
     }
 
     function getByClass(className, parent) {
-        var result = parent.getElementsByClassName(className);
+        var result = $(parent).find('.' + className);
 
         return result.length ? result[0] : null;
     }
 
     function create(tag) {
-        return document.createElement(tag);
+        return $('<' + tag + '></' + tag + '>')[0];
     }
 
     function insertBefore(itemToInsert, target) {
-        var parent = target.parentNode;
-
-        parent.insertBefore(itemToInsert, target);
+        $(itemToInsert).insertBefore(target);
     }
 
     function setInnerHtml(target, content) {
-        target.innerHTML = content;
+        $(target).html(content);
     }
 
     function setOuterHtml(target, content) {
-        target.outerHTML = content;
+        $(target).replaceWith(content);
     }
 
     function addListener(target, eventName, handler) {
-        target.addEventListener(eventName, handler, false);
+        $(target).on(eventName, handler);
     }
 
     function removeListener(target, eventName, handler) {
-        target.removeEventListener(eventName, handler, false);
+        $(target).off(eventName, handler);
     }
 
     return {

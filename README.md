@@ -1,4 +1,4 @@
 ToDo List
 =========
 
-[Демо](https://pilotessa.github.io/todo-list-stub/)
+[Демо](http://test.helene.com.ua/todo/)

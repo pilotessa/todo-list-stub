@@ -3,7 +3,6 @@ if (!!!AppScope) {
 }
 
 AppScope.TaskLocalStorage = (function () {
-
     var TASKS_KEY = AppScope.localStorageConstants.TASK_LIST,
         Task = AppScope.Task;
 

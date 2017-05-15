@@ -3,15 +3,14 @@ if (!!!AppScope) {
 }
 
 AppScope.TaskService = (function () {
-    var DomService = AppScope.DomService,
-        _isInitialized,
+    var _isInitialized,
         _storage,
         _data;
 
     function initialize(onSuccess) {
         if (!_isInitialized) {
             if (AppScope.config.storage == 'serverApi') {
-                _storage = AppScope.ServerApi;
+                _storage = AppScope.TaskServerApi;
             } else {
                 _storage = AppScope.TaskLocalStorage;
             }

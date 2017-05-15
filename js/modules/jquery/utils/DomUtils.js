@@ -15,17 +15,35 @@ AppScope.JQuery.DomUtils = (function () {
     }
 
     function removeClass(target, className) {
-        if (className) {
-            $(target).removeClass(className);
-        } else {
-            $(target).removeClass();
-        }
+        $(target).removeClass(className);
     }
 
     function getById(id) {
         var result  = $('#' + id);
 
         return result.length ? result[0] : null;
+    }
+
+    function getByClass(className, parent) {
+        var result = $(parent).find('.' + className);
+
+        return result.length ? result[0] : null;
+    }
+
+    function create(tag) {
+        return $('<' + tag + '></' + tag + '>')[0];
+    }
+
+    function insertBefore(itemToInsert, target) {
+        $(itemToInsert).insertBefore(target);
+    }
+
+    function setInnerHtml(target, content) {
+        $(target).html(content);
+    }
+
+    function setOuterHtml(target, content) {
+        $(target).replaceWith(content);
     }
 
     function addListener(target, eventName, handler) {
@@ -41,6 +59,11 @@ AppScope.JQuery.DomUtils = (function () {
         addClass: addClass,
         removeClass: removeClass,
         getById: getById,
+        getByClass: getByClass,
+        create: create,
+        insertBefore: insertBefore,
+        setInnerHtml: setInnerHtml,
+        setOuterHtml: setOuterHtml,
         addListener: addListener,
         removeListener: removeListener
     }

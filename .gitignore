@@ -1,4 +1,4 @@
 # ignore all idea's specific project files.
 .idea
 *.iml
-
+node_modules/

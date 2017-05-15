@@ -1,0 +1,24 @@
+{
+  "name": "todo-list",
+  "version": "1.0.0",
+  "description": "ToDo List =========",
+  "main": "js/main.js",
+  "dependencies": {
+    "jquery": "^3.2.1",
+    "mustache": "^2.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pilotessa/todo-list-stub.git"
+  },
+  "author": "Elena Mukhina",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pilotessa/todo-list-stub/issues"
+  },
+  "homepage": "https://github.com/pilotessa/todo-list-stub#readme"
+}

@@ -3,32 +3,34 @@ if (!!!AppScope) {
 }
 
 AppScope.TodoListController = (function () {
-
     var DomService = AppScope.DomService,
-        ViewRenderer = AppScope.ViewRenderer,
         Task = AppScope.Task,
         TaskStatusEnum = AppScope.TaskStatusEnum,
         TaskService = AppScope.TaskService,
-        listWrapperId;
+        _viewRenderer,
+        _listWrapperId;
 
     function initialize(wrapperId) {
         if (!wrapperId) {
             throw new Error("List ID is undefined");
         }
-        listWrapperId = wrapperId;
+        _listWrapperId = wrapperId;
 
-        initServices();
-    }
+        // Init view
+        if (AppScope.config.module == 'jQuery') {
+            _viewRenderer = AppScope.JQuery.TodoListViewRenderer;
+        } else {
+            _viewRenderer = AppScope.Vanilla.TodoListViewRenderer;
+        }
 
-    function initServices() {
+        // Init services
         DomService.initialize();
-        ViewRenderer.initialize();
         TaskService.initialize(onTaskServiceInitialize);
     }
 
     function onTaskServiceInitialize() {
         if (!AppScope.domElements) {
-            ViewRenderer.renderStaticContent(listWrapperId);
+            _viewRenderer.renderStaticContent(_listWrapperId);
             initStaticContentListeners();
         }
 
@@ -52,7 +54,7 @@ AppScope.TodoListController = (function () {
             task.isChecked = false;
             task.id = TaskService.createTask(task);
 
-            ViewRenderer.renderTask(task);
+            _viewRenderer.renderTask(task);
             AppScope.domElements.newValue.value = '';
         }
     }
@@ -74,7 +76,7 @@ AppScope.TodoListController = (function () {
             task.status = TaskStatusEnum.COMPLETED_TASK;
             TaskService.updateTask(task);
 
-            ViewRenderer.renderTask(task);
+            _viewRenderer.renderTask(task);
         } else if (DomService.hasClass(event.target, 'todo-list-item-delete')) {
             li = event.target.parentNode.parentNode;
             task = TaskService.getTask(li.id);
@@ -89,7 +91,7 @@ AppScope.TodoListController = (function () {
             task.status = TaskStatusEnum.ACTIVE_TASK;
             TaskService.updateTask(task);
 
-            ViewRenderer.renderTask(task);
+            _viewRenderer.renderTask(task);
         }
     }
 
@@ -122,7 +124,7 @@ AppScope.TodoListController = (function () {
                         task.isChecked = false;
                         TaskService.updateTask(task);
 
-                        ViewRenderer.renderTask(task);
+                        _viewRenderer.renderTask(task);
                     }
                 }
 
@@ -136,7 +138,7 @@ AppScope.TodoListController = (function () {
                         task.isChecked = false;
                         TaskService.updateTask(task);
 
-                        ViewRenderer.renderTask(task);
+                        _viewRenderer.renderTask(task);
                     }
                 }
 
@@ -161,7 +163,11 @@ AppScope.TodoListController = (function () {
     function loadList() {
         var list = TaskService.getList();
 
-        ViewRenderer.renderList(list);
+        for (var i = 0; i < list.length; i++) {
+            var task = list[i];
+
+            _viewRenderer.renderTask(task);
+        }
     }
 
     function filterList() {

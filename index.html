@@ -19,8 +19,9 @@
     </div>
 </div>
 
-<!--Importing vendor libraries-->
-<script src="js/vendor/jquery-3.2.1.min.js"></script>
+<!--Importing vendor packages-->
+<script src="node_modules/jquery/dist/jquery.js"></script>
+<script src="node_modules/mustache/mustache.js"></script>
 
 <!--Importing all constants & utils-->
 <script src="js/constants/localStorageConstants.js"></script>
@@ -35,12 +36,12 @@
 <script src="js/dao/TaskLocalStorage.js"></script>
 
 <!--Importing all views-->
-<script src="js/modules/vanilla/views/View.js"></script>
-<script src="js/modules/jquery/views/View.js"></script>
+<script src="js/views/TodoListView.js"></script>
+<script src="js/modules/vanilla/views/TodoListViewRenderer.js"></script>
+<script src="js/modules/jquery/views/TodoListViewRenderer.js"></script>
 
 <!--Importing all services-->
 <script src="js/services/DomService.js"></script>
-<script src="js/services/ViewRenderer.js"></script>
 <script src="js/services/TaskService.js"></script>
 
 <!--Importing all controllers-->

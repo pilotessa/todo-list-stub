@@ -4,12 +4,12 @@ if (!!!AppScope) {
 
 AppScope.TaskService = (function () {
     var DomService = AppScope.DomService,
-        isInitialized,
+        _isInitialized,
         _storage,
         _data;
 
     function initialize(onSuccess) {
-        if (!isInitialized) {
+        if (!_isInitialized) {
             if (AppScope.config.storage == 'serverApi') {
                 _storage = AppScope.ServerApi;
             } else {
@@ -18,7 +18,7 @@ AppScope.TaskService = (function () {
 
             _storage.readData(
                 function (data) {
-                    isInitialized = true;
+                    _isInitialized = true;
                     _data = data;
 
                     onSuccess();
@@ -31,7 +31,7 @@ AppScope.TaskService = (function () {
     }
 
     function getList() {
-        if (!isInitialized) {
+        if (!_isInitialized) {
             return;
         }
 
@@ -39,7 +39,7 @@ AppScope.TaskService = (function () {
     }
 
     function createTask(task) {
-        if (!isInitialized) {
+        if (!_isInitialized) {
             return;
         }
 
@@ -52,7 +52,7 @@ AppScope.TaskService = (function () {
     }
 
     function getTask(id) {
-        if (!isInitialized) {
+        if (!_isInitialized) {
             return;
         }
 
@@ -68,7 +68,7 @@ AppScope.TaskService = (function () {
     }
 
     function updateTask(task) {
-        if (!isInitialized) {
+        if (!_isInitialized) {
             return;
         }
 
@@ -85,7 +85,7 @@ AppScope.TaskService = (function () {
     }
 
     function deleteTask(task) {
-        if (!isInitialized) {
+        if (!_isInitialized) {
             return;
         }
 

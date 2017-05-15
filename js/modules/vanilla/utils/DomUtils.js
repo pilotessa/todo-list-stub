@@ -28,18 +28,6 @@ AppScope.Vanilla.DomUtils = (function () {
         return document.getElementById(id);
     }
 
-    function getByClass(name) {
-        var result = document.getElementsByClassName(name);
-
-        return result.length ? result[0] : null;
-    }
-
-    function getByTag(name) {
-        var result = document.getElementsByTagName(name);
-
-        return result.length ? result[0] : null;
-    }
-
     function addListener(target, eventName, handler) {
         target.addEventListener(eventName, handler, false);
     }
@@ -48,21 +36,12 @@ AppScope.Vanilla.DomUtils = (function () {
         target.removeEventListener(eventName, handler, false);
     }
 
-    function trigger(target, eventName) {
-        var event = new Event(eventName);
-
-        target.dispatchEvent(event);
-    }
-
     return {
         hasClass: hasClass,
         addClass: addClass,
         removeClass: removeClass,
         getById: getById,
-        getByClass: getByClass,
-        getByTag: getByTag,
         addListener: addListener,
-        removeListener: removeListener,
-        trigger: trigger
+        removeListener: removeListener
     }
 })();

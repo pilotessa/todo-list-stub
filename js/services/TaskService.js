@@ -8,7 +8,7 @@ AppScope.TaskService = (function () {
         _storage,
         _data;
 
-    function initialize() {
+    function initialize(onSuccess) {
         if (!isInitialized) {
             if (AppScope.config.storage == 'serverApi') {
                 _storage = AppScope.ServerApi;
@@ -21,7 +21,7 @@ AppScope.TaskService = (function () {
                     isInitialized = true;
                     _data = data;
 
-                    DomService.trigger(document, 'taskServiceInitialize');
+                    onSuccess();
                 },
                 function (e) {
                     throw new Error(e.message);

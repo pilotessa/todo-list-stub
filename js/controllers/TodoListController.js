@@ -5,16 +5,11 @@ if (!!!AppScope) {
 AppScope.TodoListController = (function () {
 
     var DomService = AppScope.DomService,
+        ViewRenderer = AppScope.ViewRenderer,
         Task = AppScope.Task,
         TaskStatusEnum = AppScope.TaskStatusEnum,
         TaskService = AppScope.TaskService,
-        listWrapperId,
-        $listWrapper,
-        $list,
-        $listNewValue,
-        $listFooter,
-        $listBatchUpdate,
-        $listFilter;
+        listWrapperId;
 
     function initialize(wrapperId) {
         if (!wrapperId) {
@@ -27,14 +22,13 @@ AppScope.TodoListController = (function () {
 
     function initServices() {
         DomService.initialize();
-
-        DomService.addListener(document, 'taskServiceInitialize', onTaskServiceInitialize);
-        TaskService.initialize();
+        ViewRenderer.initialize();
+        TaskService.initialize(onTaskServiceInitialize);
     }
 
     function onTaskServiceInitialize() {
-        if (!$listWrapper) {
-            renderStaticContent();
+        if (!AppScope.domElements) {
+            ViewRenderer.renderStaticContent(listWrapperId);
             initStaticContentListeners();
         }
 
@@ -42,57 +36,24 @@ AppScope.TodoListController = (function () {
         filterList();
     }
 
-    function renderStaticContent() {
-        var content = '<ul class="todo-list list-group">' +
-                '<li class="todo-list-header list-group-item active">' +
-                    '<input type="text" placeholder="What needs to be done?" autofocus="autofocus" class="todo-list-new-item-value form-control input-sm">' +
-                '</li>' +
-                '<li class="todo-list-footer list-group-item active form-inline">' +
-                    'With selected: ' +
-                    '<select class="todo-list-batch-update form-control input-sm">' +
-                        '<option value="">Choose action</option>' +
-                        '<option value="delete">Delete</option>' +
-                        '<option value="complete">Mark as complete</option>' +
-                        '<option value="active">Mark as active</option>' +
-                    '</select> ' +
-                    '<select class="todo-list-filter form-control input-sm">' +
-                        '<option value="">Show all</option>' +
-                        '<option value="active">Show active</option>' +
-                        '<option value="complete">Show complete</option>' +
-                    '</select>' +
-                '</li>' +
-            '</ul>';
-
-        $listWrapper = DomService.getById(listWrapperId);
-        $listWrapper.innerHTML = content;
-
-        $list = DomService.getByTag('ul');
-        $listNewValue = DomService.getByClass('todo-list-new-item-value');
-        $listFooter = DomService.getByClass('todo-list-footer');
-        $listBatchUpdate = DomService.getByClass('todo-list-batch-update');
-        $listFilter = DomService.getByClass('todo-list-filter');
-    }
-
     function initStaticContentListeners() {
-        DomService.addListener($listNewValue, 'keyup', onTaskCreate);
-        DomService.addListener($list, 'click', onTaskUpdate);
-        DomService.addListener($listBatchUpdate, 'change', onBatchUpdate);
-        DomService.addListener($listFilter, 'change', onListFilter);
+        DomService.addListener(AppScope.domElements.$newValue, 'keyup', onTaskCreate);
+        DomService.addListener(AppScope.domElements.$list, 'click', onTaskUpdate);
+        DomService.addListener(AppScope.domElements.$batchUpdate, 'change', onBatchUpdate);
+        DomService.addListener(AppScope.domElements.$filter, 'change', onListFilter);
     }
 
     function onTaskCreate(event) {
         if (event.keyCode == 13) {
-            var task = new Task(),
-                $li;
+            var task = new Task();
 
             task.value = this.value;
             task.status = TaskStatusEnum.ACTIVE_TASK;
             task.isChecked = false;
             task.id = TaskService.createTask(task);
 
-            $li = renderTask(task);
-            $list.insertBefore($li, $listFooter);
-            $listNewValue.value = '';
+            ViewRenderer.renderTask(task);
+            AppScope.domElements.$newValue.value = '';
         }
     }
 
@@ -113,14 +74,14 @@ AppScope.TodoListController = (function () {
             task.status = TaskStatusEnum.COMPLETED_TASK;
             TaskService.updateTask(task);
 
-            renderTask(task);
+            ViewRenderer.renderTask(task);
         } else if (DomService.hasClass(event.target, 'todo-list-item-delete')) {
             $li = event.target.parentNode.parentNode;
             task = TaskService.getTask($li.id);
 
             TaskService.deleteTask(task);
 
-            $list.removeChild($li);
+            AppScope.domElements.$list.removeChild($li);
         } else if (DomService.hasClass(event.target, 'todo-list-item-mark-as-active')) {
             $li = event.target.parentNode.parentNode;
             task = TaskService.getTask($li.id);
@@ -128,7 +89,7 @@ AppScope.TodoListController = (function () {
             task.status = TaskStatusEnum.ACTIVE_TASK;
             TaskService.updateTask(task);
 
-            renderTask(task);
+            ViewRenderer.renderTask(task);
         }
     }
 
@@ -147,7 +108,7 @@ AppScope.TodoListController = (function () {
 
                         TaskService.deleteTask(task);
 
-                        $list.removeChild($li);
+                        AppScope.domElements.$list.removeChild($li);
                     }
                 }
 
@@ -161,7 +122,7 @@ AppScope.TodoListController = (function () {
                         task.isChecked = false;
                         TaskService.updateTask(task);
 
-                        renderTask(task);
+                        ViewRenderer.renderTask(task);
                     }
                 }
 
@@ -175,7 +136,7 @@ AppScope.TodoListController = (function () {
                         task.isChecked = false;
                         TaskService.updateTask(task);
 
-                        renderTask(task);
+                        ViewRenderer.renderTask(task);
                     }
                 }
 
@@ -200,63 +161,19 @@ AppScope.TodoListController = (function () {
     function loadList() {
         var list = TaskService.getList();
 
-        renderList(list);
-    }
-
-    function renderList(list) {
-        for (var i = 0; i < list.length; i++) {
-            var task = list[i],
-                $li = renderTask(task);
-
-            $list.insertBefore($li, $listFooter);
-        }
-    }
-
-    function renderTask(task) {
-        var $li,
-            liClassName,
-            actionClassName;
-
-        if (task) {
-            $li = task.id ? DomService.getById(task.id) : null;
-        }
-
-        if (!$li) {
-            $li = document.createElement('li');
-            $li.id = task.id;
-        }
-
-        if (task.status === TaskStatusEnum.ACTIVE_TASK) {
-            liClassName = 'list-group-item-warning';
-            actionClassName = 'glyphicon glyphicon-ok todo-list-item-mark-as-complete';
-        } else if (task.status === TaskStatusEnum.COMPLETED_TASK) {
-            liClassName = 'list-group-item-success';
-            actionClassName = 'glyphicon glyphicon-repeat todo-list-item-mark-as-active';
-        }
-
-        DomService.removeClass($li);
-        DomService.addClass($li, 'todo-list-item');
-        DomService.addClass($li, 'list-group-item');
-        DomService.addClass($li, liClassName);
-        $li.innerHTML = '<div>' +
-            '<span class="todo-list-title"><input type="checkbox" class="todo-list-item-check"' + (task.isChecked ? 'checked' : '') + '>' + task.value + '</span>' +
-            '<span class="todo-list-item-delete glyphicon glyphicon-remove"></span>' +
-            '<span class="glyphicon ' + actionClassName + '"></span>' +
-            '</div>';
-
-        return $li;
+        ViewRenderer.renderList(list);
     }
 
     function filterList() {
         var filter = window.location.hash.replace('#', '');
 
-        DomService.removeClass($list, 'todo-list-filter-active');
-        DomService.removeClass($list, 'todo-list-filter-complete');
+        DomService.removeClass(AppScope.domElements.$list, 'todo-list-filter-active');
+        DomService.removeClass(AppScope.domElements.$list, 'todo-list-filter-complete');
         if (filter) {
-            DomService.addClass($list, 'todo-list-filter-' + filter);
+            DomService.addClass(AppScope.domElements.$list, 'todo-list-filter-' + filter);
         }
 
-        $listFilter.value = filter;
+        AppScope.domElements.$filter.value = filter;
     }
 
     function close() {
@@ -269,10 +186,10 @@ AppScope.TodoListController = (function () {
     }
 
     function closeStaticContentListeners() {
-        DomService.removeListener($listNewValue, 'keyup', onTaskCreate);
-        DomService.removeListener($list, 'click', onTaskUpdate);
-        DomService.removeListener($listBatchUpdate, 'change', onBatchUpdate);
-        DomService.removeListener($listFilter, 'change', onListFilter);
+        DomService.removeListener(AppScope.domElements.$newValue, 'keyup', onTaskCreate);
+        DomService.removeListener(AppScope.domElements.$list, 'click', onTaskUpdate);
+        DomService.removeListener(AppScope.domElements.$batchUpdate, 'change', onBatchUpdate);
+        DomService.removeListener(AppScope.domElements.$filter, 'change', onListFilter);
     }
 
     return {

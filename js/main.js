@@ -4,7 +4,7 @@ if (!!!AppScope) {
 
 AppScope.config = {
     storage: 'localStorage',
-    domUtils: 'vanilla'
+    module: 'vanilla'
 };
 
 // Initialize Page controller

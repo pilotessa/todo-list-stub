@@ -28,18 +28,6 @@ AppScope.JQuery.DomUtils = (function () {
         return result.length ? result[0] : null;
     }
 
-    function getByClass(name) {
-        var result = $('.' + name);
-
-        return result.length ? result[0] : null;
-    }
-
-    function getByTag(name) {
-        var result = $(name);
-
-        return result.length ? result[0] : null;
-    }
-
     function addListener(target, eventName, handler) {
         $(target).on(eventName, handler);
     }
@@ -48,19 +36,12 @@ AppScope.JQuery.DomUtils = (function () {
         $(target).off(eventName, handler);
     }
 
-    function trigger(target, eventName) {
-        $(target).trigger(eventName);
-    }
-
     return {
         hasClass: hasClass,
         addClass: addClass,
         removeClass: removeClass,
         getById: getById,
-        getByClass: getByClass,
-        getByTag: getByTag,
         addListener: addListener,
-        removeListener: removeListener,
-        trigger: trigger
+        removeListener: removeListener
     }
 })();

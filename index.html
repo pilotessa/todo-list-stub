@@ -6,7 +6,7 @@
     <title>ToDo List</title>
 
     <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/modules/vanilla/main.css">
 </head>
 <body>
 <div class="wrap">
@@ -34,8 +34,12 @@
 <!--Importing all DAOs-->
 <script src="js/dao/TaskLocalStorage.js"></script>
 
+<!--Importing all views-->
+<script src="js/modules/vanilla/views/View.js"></script>
+
 <!--Importing all services-->
 <script src="js/services/DomService.js"></script>
+<script src="js/services/ViewRenderer.js"></script>
 <script src="js/services/TaskService.js"></script>
 
 <!--Importing all controllers-->

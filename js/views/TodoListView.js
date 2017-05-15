@@ -48,8 +48,21 @@ AppScope.TodoListView = (function () {
         return Mustache.render(content, view);
     }
 
+    function getMessageOutput(message) {
+        var view = {
+            message: message
+        },
+        content = '<div class="alert alert-success alert-dismissible fade" role="alert">' +
+            '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
+            '{{message}}' +
+            '</div>';
+
+        return Mustache.render(content, view);
+    }
+
     return {
         getStaticContentOutput: getStaticContentOutput,
-        getTaskOutput: getTaskOutput
+        getTaskOutput: getTaskOutput,
+        getMessageOutput: getMessageOutput
     }
 })();

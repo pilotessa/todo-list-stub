@@ -69,6 +69,8 @@ AppScope.TodoListController = (function () {
             task.id = TaskService.createTask(task);
 
             renderTask(task);
+            renderMessage('The task is successfully created.');
+
             $newValue.value = '';
         }
     }
@@ -91,6 +93,7 @@ AppScope.TodoListController = (function () {
             TaskService.updateTask(task);
 
             renderTask(task);
+            renderMessage('The task is successfully updated.');
         } else if (DomService.hasClass(event.target, 'todo-list-item-delete')) {
             li = event.target.parentNode.parentNode;
             task = TaskService.getTask(li.id);
@@ -98,6 +101,8 @@ AppScope.TodoListController = (function () {
             TaskService.deleteTask(task);
 
             $list.removeChild(li);
+
+            renderMessage('The task is successfully deleted.');
         } else if (DomService.hasClass(event.target, 'todo-list-item-mark-as-active')) {
             li = event.target.parentNode.parentNode;
             task = TaskService.getTask(li.id);
@@ -106,6 +111,7 @@ AppScope.TodoListController = (function () {
             TaskService.updateTask(task);
 
             renderTask(task);
+            renderMessage('The task is successfully updated.');
         }
     }
 
@@ -159,6 +165,8 @@ AppScope.TodoListController = (function () {
                 break;
         }
 
+        renderMessage('The list is successfully updated.');
+
         this.value = '';
     }
 
@@ -208,6 +216,22 @@ AppScope.TodoListController = (function () {
             DomService.insertBefore($li, $footer);
         }
         DomService.setOuterHtml($li, View.getTaskOutput(task));
+    }
+
+    function renderMessage(message) {
+        if (AppScope.config.module == 'jQuery') {
+            var $message = DomService.create('div');
+
+            DomService.insertBefore($message, $list);
+            DomService.setOuterHtml($message, View.getMessageOutput(message));
+
+            setTimeout(function () {
+                $('.alert').addClass('in');
+            });
+            setTimeout(function () {
+                $('.alert').alert('close');
+            }, 1200);
+        }
     }
 
     function close() {

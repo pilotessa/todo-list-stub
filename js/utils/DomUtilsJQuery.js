@@ -40,7 +40,7 @@ AppScope.DomUtilsJQuery = (function () {
     }
 
     function setOuterHtml(target, content) {
-        $(target).replaceWith(content);
+        $(target).prop('outerHTML', content);
     }
 
     function addListener(target, eventName, handler) {

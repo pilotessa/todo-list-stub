@@ -19,14 +19,14 @@ AppScope.TaskService = (function () {
                 function (data) {
                     _isInitialized = true;
                     _data = data;
-
-                    onSuccess();
                 },
                 function (e) {
                     throw new Error(e.message);
                 }
             );
         }
+
+        onSuccess();
     }
 
     function getList() {

@@ -71,16 +71,13 @@ AppScope.TaskService = (function () {
             return;
         }
 
-        for (var i = 0; i < _data.length; i++) {
-            if (_data[i].id === task.id) {
-                _data[i] = task;
-                _storage.updateData(_data);
+        if (_data.indexOf(task) > -1) {
+            _storage.updateData(_data);
 
-                return true;
-            }
+            return true;
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     function deleteTask(task) {
@@ -88,16 +85,16 @@ AppScope.TaskService = (function () {
             return;
         }
 
-        for (var i = 0; i < _data.length; i++) {
-            if (_data[i].id === task.id) {
-                _data.splice(i, 1);
-                _storage.updateData(_data);
+        var i = _data.indexOf(task);
 
-                return true;
-            }
+        if (i > -1) {
+            _data.splice(i, 1);
+            _storage.updateData(_data);
+
+            return true;
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     return {

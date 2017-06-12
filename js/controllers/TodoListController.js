@@ -78,18 +78,18 @@ AppScope.TodoListController = (function () {
     }
 
     function onTaskUpdate(event) {
-        var li,
+        var $li,
             task;
 
         if (DomService.hasClass(event.target, 'todo-list-item-check')) {
-            li = event.target.parentNode.parentNode.parentNode;
-            task = TaskService.getTask(li.id);
+            $li = event.target.parentNode.parentNode.parentNode;
+            task = TaskService.getTask($li.id);
 
             task.isChecked = !task.isChecked;
             TaskService.updateTask(task);
         } else if (DomService.hasClass(event.target, 'todo-list-item-mark-as-complete')) {
-            li = event.target.parentNode.parentNode;
-            task = TaskService.getTask(li.id);
+            $li = event.target.parentNode.parentNode;
+            task = TaskService.getTask($li.id);
 
             task.status = TaskStatusEnum.COMPLETED_TASK;
             TaskService.updateTask(task);
@@ -98,20 +98,9 @@ AppScope.TodoListController = (function () {
             if (canRenderMessage()) {
                 renderMessage('The task is successfully updated.');
             }
-        } else if (DomService.hasClass(event.target, 'todo-list-item-delete')) {
-            li = event.target.parentNode.parentNode;
-            task = TaskService.getTask(li.id);
-
-            TaskService.deleteTask(task);
-
-            $list.removeChild(li);
-
-            if (canRenderMessage()) {
-                renderMessage('The task is successfully deleted.');
-            }
         } else if (DomService.hasClass(event.target, 'todo-list-item-mark-as-active')) {
-            li = event.target.parentNode.parentNode;
-            task = TaskService.getTask(li.id);
+            $li = event.target.parentNode.parentNode;
+            task = TaskService.getTask($li.id);
 
             task.status = TaskStatusEnum.ACTIVE_TASK;
             TaskService.updateTask(task);
@@ -119,6 +108,17 @@ AppScope.TodoListController = (function () {
             renderTask(task);
             if (canRenderMessage()) {
                 renderMessage('The task is successfully updated.');
+            }
+        } else if (DomService.hasClass(event.target, 'todo-list-item-delete')) {
+            $li = event.target.parentNode.parentNode;
+            task = TaskService.getTask($li.id);
+
+            TaskService.deleteTask(task);
+
+            $list.removeChild($li);
+
+            if (canRenderMessage()) {
+                renderMessage('The task is successfully deleted.');
             }
         }
     }
@@ -134,11 +134,11 @@ AppScope.TodoListController = (function () {
                     task = list[i];
 
                     if (task.isChecked) {
-                        var li = DomService.getById(task.id);
+                        var $li = DomService.getById(task.id);
 
                         TaskService.deleteTask(task);
 
-                        $list.removeChild(li);
+                        $list.removeChild($li);
                     }
                 }
 
